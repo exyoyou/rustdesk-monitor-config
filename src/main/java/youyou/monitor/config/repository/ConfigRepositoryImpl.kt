@@ -277,13 +277,14 @@ class ConfigRepositoryImpl(
         }
 
         try {
-            if (_configFlow.value != config) {
-                val json = serializeConfig(config)
-                configFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
-                configFile.writeText(json)
+            val changed = _configFlow.value != config
+            val json = serializeConfig(config)
+            configFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
+            configFile.writeText(json)
+            if (changed) {
                 _configFlow.value = config
-                Log.d(TAG, "本地配置已保存")
             }
+            Log.d(TAG, "本地配置已保存")
         } catch (e: Exception) {
             Log.e(TAG, "保存本地配置失败: ${e.message}", e)
         }
