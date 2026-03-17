@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import youyou.monitor.config.model.LocationTrackConfig
 import youyou.monitor.config.model.MonitorConfig
 import youyou.monitor.config.model.WebDavServer
 import java.io.File
@@ -160,6 +161,21 @@ class ConfigRepositoryImpl(
             )
         }
 
+        val locationObj = obj.optJSONObject("locationTrack")
+        val locationTrack = LocationTrackConfig(
+            needAddress = locationObj?.optBoolean("needAddress", true) ?: true,
+            adaptiveInterval = locationObj?.optBoolean("adaptiveInterval", true) ?: true,
+            movingIntervalMs = locationObj?.optLong("movingIntervalMs", 10_000L) ?: 10_000L,
+            staticIntervalMs = locationObj?.optLong("staticIntervalMs", 60_000L) ?: 60_000L,
+            movementThresholdMeters = locationObj?.optDouble("movementThresholdMeters", 30.0) ?: 30.0,
+            maxAcceptAccuracyMeters =
+                (locationObj?.optDouble("maxAcceptAccuracyMeters", 120.0) ?: 120.0).toFloat(),
+            rawRetentionDays = locationObj?.optInt("rawRetentionDays", 2) ?: 2,
+            rawDedupMinDistanceMeters =
+                locationObj?.optDouble("rawDedupMinDistanceMeters", 8.0) ?: 8.0,
+            rawDedupMinIntervalMs = locationObj?.optLong("rawDedupMinIntervalMs", 15_000L) ?: 15_000L
+        )
+
         return MonitorConfig(
             matchThreshold = obj.optDouble("matchThreshold", 0.92),
             matchCooldownMs = obj.optLong("matchCooldownMs", 3000L),
@@ -171,6 +187,7 @@ class ConfigRepositoryImpl(
             matcherType = obj.optString("matcherType", "grayscale"),
             preferExternalStorage = obj.optBoolean("preferExternalStorage", false),
             rootDir = obj.optString("rootDir", "PingerLove"),
+            locationTrack = locationTrack,
             webdavServers = webdavServers
         )
     }
@@ -187,6 +204,19 @@ class ConfigRepositoryImpl(
         obj.put("matcherType", config.matcherType)
         obj.put("preferExternalStorage", config.preferExternalStorage)
         obj.put("rootDir", config.rootDir)
+
+        val locationObj = JSONObject().apply {
+            put("needAddress", config.locationTrack.needAddress)
+            put("adaptiveInterval", config.locationTrack.adaptiveInterval)
+            put("movingIntervalMs", config.locationTrack.movingIntervalMs)
+            put("staticIntervalMs", config.locationTrack.staticIntervalMs)
+            put("movementThresholdMeters", config.locationTrack.movementThresholdMeters)
+            put("maxAcceptAccuracyMeters", config.locationTrack.maxAcceptAccuracyMeters)
+            put("rawRetentionDays", config.locationTrack.rawRetentionDays)
+            put("rawDedupMinDistanceMeters", config.locationTrack.rawDedupMinDistanceMeters)
+            put("rawDedupMinIntervalMs", config.locationTrack.rawDedupMinIntervalMs)
+        }
+        obj.put("locationTrack", locationObj)
 
         val serversArray = JSONArray()
         config.webdavServers.forEach { server ->

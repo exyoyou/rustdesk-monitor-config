@@ -9,6 +9,17 @@
   "videoDir": "ScreenRecord",
   "templateDir": "Templates",
   "matcherType": "grayscale",
+  "locationTrack": {
+    "needAddress": true,
+    "adaptiveInterval": true,
+    "movingIntervalMs": 10000,
+    "staticIntervalMs": 60000,
+    "movementThresholdMeters": 30.0,
+    "maxAcceptAccuracyMeters": 120.0,
+    "rawRetentionDays": 2,
+    "rawDedupMinDistanceMeters": 8.0,
+    "rawDedupMinIntervalMs": 15000
+  },
   "webdavServers": [
     {
       "url": "http://192.168.50.30:5244/dav",
