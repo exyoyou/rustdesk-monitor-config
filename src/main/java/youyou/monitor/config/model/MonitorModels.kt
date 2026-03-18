@@ -33,6 +33,10 @@ data class WebDavServer(
 data class LocationTrackConfig(
     /** 是否需要逆地理信息（地址/POI） */
     val needAddress: Boolean = true,
+    /** 是否启用“单次定位 + 间隔轮询”模式 */
+    val singleShotPolling: Boolean = true,
+    /** 是否仅在设备空闲（锁屏/熄屏）时采集 */
+    val idleOnly: Boolean = true,
     /** 是否启用“运动/静止”自适应采样间隔 */
     val adaptiveInterval: Boolean = true,
     /** 运动状态下定位间隔（毫秒） */
