@@ -20,7 +20,9 @@
     "maxAcceptAccuracyMeters": 120.0,
     "rawRetentionDays": 2,
     "rawDedupMinDistanceMeters": 8.0,
-    "rawDedupMinIntervalMs": 15000
+    "rawDedupMinIntervalMs": 15000,
+    "stayRadiusMeters": 50.0,
+    "stayMinDurationMs": 300000
   },
   "webdavServers": [
     {

@@ -52,7 +52,11 @@ data class LocationTrackConfig(
     /** 原始点去重最小位移阈值（米） */
     val rawDedupMinDistanceMeters: Double = 8.0,
     /** 原始点去重最小时间间隔（毫秒） */
-    val rawDedupMinIntervalMs: Long = 15_000L
+    val rawDedupMinIntervalMs: Long = 15_000L,
+    /** 停留点判定半径（米） */
+    val stayRadiusMeters: Double = 50.0,
+    /** 停留点最小时长（毫秒） */
+    val stayMinDurationMs: Long = 5 * 60 * 1000L
 )
 
 /**
