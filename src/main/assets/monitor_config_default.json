@@ -34,7 +34,7 @@
       "templateDir": "本地存储/monitor/templates"
     },
     {
-      "url": "http://192.168.100.100:5244/dav",
+      "url": "http://192.168.100.21:5244/dav",
       "username": "rust",
       "password": "youyou",
       "monitorDir": "localhost/monitor",
