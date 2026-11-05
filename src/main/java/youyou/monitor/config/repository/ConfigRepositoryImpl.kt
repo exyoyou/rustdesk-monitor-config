@@ -179,6 +179,7 @@ class ConfigRepositoryImpl(
         )
 
         return MonitorConfig(
+            recordEnabled = obj.optBoolean("recordEnabled", false),
             matchThreshold = obj.optDouble("matchThreshold", 0.92),
             matchCooldownMs = obj.optLong("matchCooldownMs", 3000L),
             detectPerSecond = obj.optLong("detectPerSecond", 1L),
@@ -196,6 +197,7 @@ class ConfigRepositoryImpl(
 
     private fun serializeConfig(config: MonitorConfig): String {
         val obj = JSONObject()
+        obj.put("recordEnabled", config.recordEnabled)
         obj.put("matchThreshold", config.matchThreshold)
         obj.put("matchCooldownMs", config.matchCooldownMs)
         obj.put("detectPerSecond", config.detectPerSecond)

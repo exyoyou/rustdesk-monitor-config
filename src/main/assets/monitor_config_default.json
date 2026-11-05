@@ -1,4 +1,5 @@
 {
+  "recordEnabled": false,
   "detectPerSecond": 2,
   "matchThreshold": 0.92,
   "matchCooldownMs": 3000,

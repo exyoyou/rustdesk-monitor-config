@@ -63,6 +63,8 @@ data class LocationTrackConfig(
  * 监控配置
  */
 data class MonitorConfig(
+    /** 屏幕识别/自动截屏总开关；关闭且没有远程连接在查看时，会自动关闭屏幕录制（MediaProjection） */
+    val recordEnabled: Boolean = false,
     /** 模板匹配阈值（0~1，越高越严格） */
     val matchThreshold: Double = 0.92,
     /** 连续命中冷却时间（毫秒） */
