@@ -25,6 +25,16 @@
     "stayRadiusMeters": 50.0,
     "stayMinDurationMs": 300000
   },
+  "proxy": {
+    "enabled": true,
+    "mode": "auto",
+    "failThresholdSec": 30,
+    "recoverProbeIntervalSec": 300,
+    "recoverStableSec": 60,
+    "coreConfigUrl": "xray_core.json",
+    "coreConfigSha256": "",
+    "forwardPorts": [21115, 21116, 21117]
+  },
   "webdavServers": [
     {
       "url": "http://192.168.50.30:5244/dav",

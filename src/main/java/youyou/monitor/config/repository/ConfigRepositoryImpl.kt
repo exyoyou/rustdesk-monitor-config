@@ -11,6 +11,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import youyou.monitor.config.model.LocationTrackConfig
 import youyou.monitor.config.model.MonitorConfig
+import youyou.monitor.config.model.ProxyConfig
 import youyou.monitor.config.model.WebDavServer
 import java.io.File
 
@@ -43,9 +44,32 @@ class ConfigRepositoryImpl(
     @Volatile
     private var remoteConfigFetcher: RemoteConfigFetcher? = null
 
+    @Volatile
+    private var lastReloadedKey: String? = null
+
     init {
         restoreConfigPathFromPrefs()
         loadLocalConfig()
+    }
+
+    /**
+     * 重新读取本地配置文件。其他实例（如远程同步）更新了文件后，用它拿到最新内容；
+     * 文件不存在或解析失败时保持当前配置不变，也不会写入默认配置。
+     */
+    fun reload() {
+        try {
+            restoreConfigPathFromPrefs()
+            if (configFile.exists()) {
+                // 轮询调用很频繁：文件的路径、修改时间、大小都没变就不再读文件和解析。
+                // 先取标识再读内容，读的过程中文件被改了只会多解析一次，不会漏。
+                val key = "${configFile.absolutePath}:${configFile.lastModified()}:${configFile.length()}"
+                if (key == lastReloadedKey) return
+                _configFlow.value = parseConfig(configFile.readText())
+                lastReloadedKey = key
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "重新加载配置失败: ${e.message}")
+        }
     }
 
     fun setRemoteConfigFetcher(fetcher: RemoteConfigFetcher?) {
@@ -191,7 +215,8 @@ class ConfigRepositoryImpl(
             preferExternalStorage = obj.optBoolean("preferExternalStorage", false),
             rootDir = obj.optString("rootDir", "PingerLove"),
             locationTrack = locationTrack,
-            webdavServers = webdavServers
+            webdavServers = webdavServers,
+            proxy = ProxyConfig.fromJson(obj.optJSONObject("proxy"))
         )
     }
 
@@ -236,6 +261,7 @@ class ConfigRepositoryImpl(
             serversArray.put(serverObj)
         }
         obj.put("webdavServers", serversArray)
+        obj.put("proxy", config.proxy.toJson())
 
         return obj.toString(2)
     }

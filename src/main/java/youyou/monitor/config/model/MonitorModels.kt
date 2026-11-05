@@ -88,7 +88,9 @@ data class MonitorConfig(
     /** 定位轨迹相关配置 */
     val locationTrack: LocationTrackConfig = LocationTrackConfig(),
     /** WebDAV 服务器列表（支持多服务器） */
-    val webdavServers: List<WebDavServer> = emptyList()
+    val webdavServers: List<WebDavServer> = emptyList(),
+    /** 应用内代理（monitor-proxy）配置 */
+    val proxy: ProxyConfig = ProxyConfig()
 ) {
     companion object {
         fun default() = MonitorConfig()
