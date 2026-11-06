@@ -31,6 +31,8 @@ data class WebDavServer(
  * - rawDedupMinIntervalMs: 10_000 ~ 30_000
  */
 data class LocationTrackConfig(
+    /** 定位轨迹总开关：开启自动启动采集，关闭自动停止（与屏幕录制无关） */
+    val enabled: Boolean = false,
     /** 是否需要逆地理信息（地址/POI） */
     val needAddress: Boolean = true,
     /** 是否启用“单次定位 + 间隔轮询”模式 */

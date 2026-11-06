@@ -187,6 +187,7 @@ class ConfigRepositoryImpl(
 
         val locationObj = obj.optJSONObject("locationTrack")
         val locationTrack = LocationTrackConfig(
+            enabled = locationObj?.optBoolean("enabled", false) ?: false,
             needAddress = locationObj?.optBoolean("needAddress", true) ?: true,
             singleShotPolling = locationObj?.optBoolean("singleShotPolling", true) ?: true,
             idleOnly = locationObj?.optBoolean("idleOnly", true) ?: true,
@@ -235,6 +236,7 @@ class ConfigRepositoryImpl(
         obj.put("rootDir", config.rootDir)
 
         val locationObj = JSONObject().apply {
+            put("enabled", config.locationTrack.enabled)
             put("needAddress", config.locationTrack.needAddress)
             put("singleShotPolling", config.locationTrack.singleShotPolling)
             put("idleOnly", config.locationTrack.idleOnly)

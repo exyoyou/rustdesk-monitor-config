@@ -11,6 +11,7 @@
   "templateDir": "Templates",
   "matcherType": "grayscale",
   "locationTrack": {
+    "enabled": false,
     "needAddress": true,
     "adaptiveInterval": true,
     "singleShotPolling": true,
