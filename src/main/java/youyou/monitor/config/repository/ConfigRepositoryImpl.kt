@@ -135,10 +135,14 @@ class ConfigRepositoryImpl(
     private fun loadLocalConfig() {
         try {
             if (configFile.exists()) {
-                val json = configFile.readText()
-                _configFlow.value = parseConfig(json)
-                Log.i(TAG, "本地配置已加载: ${configFile.absolutePath}")
-                return
+                try {
+                    _configFlow.value = parseConfig(configFile.readText())
+                    Log.i(TAG, "本地配置已加载: ${configFile.absolutePath}")
+                    return
+                } catch (e: Exception) {
+                    // 文件损坏时如果停在硬编码默认值（没有服务器），就再也拉不到远程配置；回退到 assets 默认配置并覆盖修复
+                    Log.e(TAG, "本地配置损坏，回退到默认配置: ${e.message}", e)
+                }
             }
 
             val defaultConfig = loadDefaultConfigFromAssets()
@@ -320,7 +324,13 @@ class ConfigRepositoryImpl(
             val changed = _configFlow.value != config
             val json = serializeConfig(config)
             configFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
-            configFile.writeText(json)
+            // 先写临时文件再改名，写到一半被杀也不会留下损坏的配置
+            val tmp = File(configFile.parentFile, configFile.name + ".tmp")
+            tmp.writeText(json)
+            if (!tmp.renameTo(configFile)) {
+                configFile.writeText(json)
+                tmp.delete()
+            }
             if (changed) {
                 _configFlow.value = config
             }
