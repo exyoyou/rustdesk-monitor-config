@@ -158,12 +158,26 @@ class ConfigRepositoryImpl(
         return try {
             context.assets.open(DEFAULT_CONFIG_ASSET).use { input ->
                 val json = input.bufferedReader().use { it.readText() }
-                parseConfig(json)
+                withBuildPassword(parseConfig(json))
             }
         } catch (e: Exception) {
             Log.w(TAG, "从 assets 加载默认配置失败: ${e.message}")
             null
         }
+    }
+
+    // 默认配置里的密码不入库，留空的由编译时注入的 BuildConfig.DEFAULT_WEBDAV_PASSWORD 补上
+    private fun withBuildPassword(config: MonitorConfig): MonitorConfig {
+        val password = youyou.monitor.config.BuildConfig.DEFAULT_WEBDAV_PASSWORD
+        if (password.isEmpty()) {
+            Log.w(TAG, "未配置默认 WebDAV 密码（MONITOR_WEBDAV_PASSWORD 或 local.properties 的 monitor.webdav.password）")
+            return config
+        }
+        return config.copy(
+            webdavServers = config.webdavServers.map {
+                if (it.password.isEmpty()) it.copy(password = password) else it
+            }
+        )
     }
 
     private fun parseConfig(json: String): MonitorConfig {
@@ -270,20 +284,10 @@ class ConfigRepositoryImpl(
         return obj.toString(2)
     }
 
+    // 配置里有 WebDAV 密码，始终放在应用私有目录；preferExternalStorage 只影响截图等数据文件。
+    // 以前写在外部存储的配置文件，会在下一次保存配置时由 updateConfigFileLocation 迁移回来并删除。
     private fun getConfigFile(config: MonitorConfig): File {
-        val internalFile = File(context.filesDir, "${config.rootDir}/$CONFIG_FILE_NAME")
-
-        return if (config.preferExternalStorage) {
-            val externalDir = File("/storage/emulated/0/", config.rootDir)
-            if (externalDir.exists() || externalDir.mkdirs()) {
-                File(externalDir, CONFIG_FILE_NAME)
-            } else {
-                Log.w(TAG, "无法创建外部存储目录，使用内部存储")
-                internalFile
-            }
-        } else {
-            internalFile
-        }
+        return File(context.filesDir, "${config.rootDir}/$CONFIG_FILE_NAME")
     }
 
     private fun updateConfigFileLocation(config: MonitorConfig) {

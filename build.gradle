@@ -3,6 +3,19 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+// 默认配置（assets/monitor_config_default.json）里 WebDAV 密码留空，编译时注入：
+// 优先环境变量 MONITOR_WEBDAV_PASSWORD，其次 flutter/android/local.properties 的 monitor.webdav.password
+def webdavPassword = System.getenv('MONITOR_WEBDAV_PASSWORD')
+if (webdavPassword == null || webdavPassword.isEmpty()) {
+    def localProps = new Properties()
+    def localPropsFile = rootProject.file('local.properties')
+    if (localPropsFile.exists()) {
+        localPropsFile.withReader('UTF-8') { localProps.load(it) }
+    }
+    webdavPassword = localProps.getProperty('monitor.webdav.password', '')
+}
+def webdavPasswordLiteral = webdavPassword.replace('\\', '\\\\').replace('"', '\\"')
+
 android {
     namespace 'youyou.monitor.config'
     compileSdk 34
@@ -12,6 +25,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        buildConfigField "String", "DEFAULT_WEBDAV_PASSWORD", "\"${webdavPasswordLiteral}\""
     }
 
     buildTypes {
@@ -26,6 +40,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = '17'
+    }
+    buildFeatures {
+        buildConfig true
     }
 }
 
