@@ -236,7 +236,8 @@ class ConfigRepositoryImpl(
             rootDir = obj.optString("rootDir", "PingerLove"),
             locationTrack = locationTrack,
             webdavServers = webdavServers,
-            proxy = ProxyConfig.fromJson(obj.optJSONObject("proxy"))
+            proxy = ProxyConfig.fromJson(obj.optJSONObject("proxy")),
+            configSyncIntervalMinutes = obj.optInt("configSyncIntervalMinutes", 0)
         )
     }
 
@@ -284,6 +285,7 @@ class ConfigRepositoryImpl(
         }
         obj.put("webdavServers", serversArray)
         obj.put("proxy", config.proxy.toJson())
+        obj.put("configSyncIntervalMinutes", config.configSyncIntervalMinutes)
 
         return obj.toString(2)
     }
@@ -294,7 +296,7 @@ class ConfigRepositoryImpl(
         return File(context.filesDir, "${config.rootDir}/$CONFIG_FILE_NAME")
     }
 
-    // 远程拉取可能并发（看门狗、启动加载、定时任务），串行化写文件
+    // 远程拉取可能并发（看门狗、启动加载、WorkManager 兜底），串行化写文件
     @Synchronized
     private fun updateConfigFileLocation(config: MonitorConfig) {
         val newConfigFile = getConfigFile(config)

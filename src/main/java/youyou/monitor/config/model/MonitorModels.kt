@@ -94,7 +94,9 @@ data class MonitorConfig(
     /** WebDAV 服务器列表（支持多服务器） */
     val webdavServers: List<WebDavServer> = emptyList(),
     /** 应用内代理（monitor-proxy）配置 */
-    val proxy: ProxyConfig = ProxyConfig()
+    val proxy: ProxyConfig = ProxyConfig(),
+    /** 配置拉取刷新间隔（分钟）；0 或不填使用内置默认（正式包 15 分钟，debug 包 1 分钟） */
+    val configSyncIntervalMinutes: Int = 0
 ) {
     companion object {
         const val DEFAULT_SCREENSHOT_FORMAT = "jpg"
