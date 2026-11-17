@@ -73,7 +73,7 @@ data class MonitorConfig(
     val matchCooldownMs: Long = 3000L,
     /** 每秒检测次数 */
     val detectPerSecond: Long = 1L,
-    /** 最大存储容量（MB） */
+    /** 最大存储容量（MB），超出后从最老的截图/录像开始删除；小于等于 0 表示不限制，不清理 */
     val maxStorageSizeMB: Int = 1024,
     /** 截图存储子目录 */
     val screenshotDir: String = "ScreenCaptures",
