@@ -294,6 +294,8 @@ class ConfigRepositoryImpl(
         return File(context.filesDir, "${config.rootDir}/$CONFIG_FILE_NAME")
     }
 
+    // 远程拉取可能并发（看门狗、启动加载、定时任务），串行化写文件
+    @Synchronized
     private fun updateConfigFileLocation(config: MonitorConfig) {
         val newConfigFile = getConfigFile(config)
         if (newConfigFile != configFile) {
@@ -325,7 +327,8 @@ class ConfigRepositoryImpl(
             val json = serializeConfig(config)
             configFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
             // 先写临时文件再改名，写到一半被杀也不会留下损坏的配置
-            val tmp = File(configFile.parentFile, configFile.name + ".tmp")
+            // 临时文件名每次唯一：同进程里还有 monitor-proxy 的另一个实例，不能共用一个临时文件
+            val tmp = File.createTempFile(configFile.name, ".tmp", configFile.parentFile)
             tmp.writeText(json)
             if (!tmp.renameTo(configFile)) {
                 configFile.writeText(json)
