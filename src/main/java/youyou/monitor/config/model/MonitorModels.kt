@@ -77,6 +77,8 @@ data class MonitorConfig(
     val maxStorageSizeMB: Int = 1024,
     /** 截图存储子目录 */
     val screenshotDir: String = "ScreenCaptures",
+    /** 截图保存格式（文件后缀）：jpg（默认，体积小）/ png（无损，适合 AI 训练）/ webp */
+    val screenshotFormat: String = DEFAULT_SCREENSHOT_FORMAT,
     /** 录像存储子目录 */
     val videoDir: String = "ScreenRecord",
     /** 模板存储子目录 */
@@ -95,6 +97,15 @@ data class MonitorConfig(
     val proxy: ProxyConfig = ProxyConfig()
 ) {
     companion object {
+        const val DEFAULT_SCREENSHOT_FORMAT = "jpg"
+        private val SCREENSHOT_FORMATS = setOf("jpg", "png", "webp")
+
         fun default() = MonitorConfig()
+
+        /** 规范化截图格式：忽略大小写和前导点，jpeg 视为 jpg，不支持的值回退到 jpg */
+        fun normalizeScreenshotFormat(raw: String?): String {
+            val ext = raw?.trim()?.removePrefix(".")?.lowercase()?.let { if (it == "jpeg") "jpg" else it }
+            return if (ext != null && ext in SCREENSHOT_FORMATS) ext else DEFAULT_SCREENSHOT_FORMAT
+        }
     }
 }

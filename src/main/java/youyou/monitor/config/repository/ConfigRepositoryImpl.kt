@@ -210,6 +210,7 @@ class ConfigRepositoryImpl(
             detectPerSecond = obj.optLong("detectPerSecond", 1L),
             maxStorageSizeMB = obj.optInt("maxStorageSizeMB", 1024),
             screenshotDir = obj.optString("screenshotDir", "ScreenCaptures"),
+            screenshotFormat = MonitorConfig.normalizeScreenshotFormat(obj.optString("screenshotFormat", "")),
             videoDir = obj.optString("videoDir", "ScreenRecord"),
             templateDir = obj.optString("templateDir", "Templates"),
             matcherType = obj.optString("matcherType", "grayscale"),
@@ -229,6 +230,7 @@ class ConfigRepositoryImpl(
         obj.put("detectPerSecond", config.detectPerSecond)
         obj.put("maxStorageSizeMB", config.maxStorageSizeMB)
         obj.put("screenshotDir", config.screenshotDir)
+        obj.put("screenshotFormat", config.screenshotFormat)
         obj.put("videoDir", config.videoDir)
         obj.put("templateDir", config.templateDir)
         obj.put("matcherType", config.matcherType)
