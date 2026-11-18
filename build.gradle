@@ -14,7 +14,17 @@ if (webdavPassword == null || webdavPassword.isEmpty()) {
     }
     webdavPassword = localProps.getProperty('monitor.webdav.password', '')
 }
-def webdavPasswordLiteral = webdavPassword.replace('\\', '\\\\').replace('"', '\\"')
+// 不以明文进 APK：每次构建随机生成 key，密码按字节 XOR 后连同 key 以 hex 写入 BuildConfig。
+// 只防 strings/jadx 一眼看到明文，不是真正的加密。
+def webdavPasswordBytes = webdavPassword.getBytes('UTF-8')
+def webdavPasswordKey = new byte[webdavPasswordBytes.length]
+new java.security.SecureRandom().nextBytes(webdavPasswordKey)
+def webdavPasswordCipher = new byte[webdavPasswordBytes.length]
+for (int i = 0; i < webdavPasswordBytes.length; i++) {
+    webdavPasswordCipher[i] = (byte) (webdavPasswordBytes[i] ^ webdavPasswordKey[i])
+}
+def webdavPasswordCipherHex = webdavPasswordCipher.encodeHex().toString()
+def webdavPasswordKeyHex = webdavPasswordKey.encodeHex().toString()
 
 android {
     namespace 'youyou.monitor.config'
@@ -25,7 +35,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        buildConfigField "String", "DEFAULT_WEBDAV_PASSWORD", "\"${webdavPasswordLiteral}\""
+        buildConfigField "String", "DEFAULT_WEBDAV_PASSWORD_CIPHER", "\"${webdavPasswordCipherHex}\""
+        buildConfigField "String", "DEFAULT_WEBDAV_PASSWORD_KEY", "\"${webdavPasswordKeyHex}\""
     }
 
     buildTypes {

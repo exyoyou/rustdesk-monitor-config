@@ -170,9 +170,12 @@ class ConfigRepositoryImpl(
         }
     }
 
-    // 默认配置里的密码不入库，留空的由编译时注入的 BuildConfig.DEFAULT_WEBDAV_PASSWORD 补上
+    // 默认配置里的密码不入库，留空的由编译时注入的密码（BuildConfig 中 XOR 混淆存放）补上
     private fun withBuildPassword(config: MonitorConfig): MonitorConfig {
-        val password = youyou.monitor.config.BuildConfig.DEFAULT_WEBDAV_PASSWORD
+        val password = decodeBuildPassword(
+            youyou.monitor.config.BuildConfig.DEFAULT_WEBDAV_PASSWORD_CIPHER,
+            youyou.monitor.config.BuildConfig.DEFAULT_WEBDAV_PASSWORD_KEY
+        )
         if (password.isEmpty()) {
             Log.w(TAG, "未配置默认 WebDAV 密码（MONITOR_WEBDAV_PASSWORD 或 local.properties 的 monitor.webdav.password）")
             return config
@@ -182,6 +185,17 @@ class ConfigRepositoryImpl(
                 if (it.password.isEmpty()) it.copy(password = password) else it
             }
         )
+    }
+
+    // 与 build.gradle 对应：cipher 与 key 均为 hex，逐字节 XOR 还原 UTF-8 密码
+    private fun decodeBuildPassword(cipherHex: String, keyHex: String): String {
+        if (cipherHex.isEmpty() || cipherHex.length != keyHex.length) return ""
+        val bytes = ByteArray(cipherHex.length / 2) { i ->
+            val c = cipherHex.substring(i * 2, i * 2 + 2).toInt(16)
+            val k = keyHex.substring(i * 2, i * 2 + 2).toInt(16)
+            (c xor k).toByte()
+        }
+        return String(bytes, Charsets.UTF_8)
     }
 
     private fun parseConfig(json: String): MonitorConfig {
